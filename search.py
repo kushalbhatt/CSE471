@@ -164,20 +164,20 @@ def breadthFirstSearch(problem):
         current = Q.pop()
         # mark visited
         if problem.isGoalState(current[0]):
-            # print 'Found:',current
+            print 'Found:',current
             return current[1]
 
-        # print 'current = ',current
         if current[0] in visited:
             continue
         #mark visited
         visited.append(current[0])
         #explore
+        #print current
         x = problem.getSuccessors(current[0])
-        # print '\t',current[0],' successors: ',x
-
+        #print 'current = ', current
         for i in x:
             if i[0] not in visited:
+                #print "\tsucessor :", i
                 # can't assign on tupple
                 i = list(i)
                 i[1] = current[1] + [i[1]]
