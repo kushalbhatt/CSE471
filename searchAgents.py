@@ -503,41 +503,37 @@ def foodHeuristic(state, problem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
-    food = 0
-    total_d = 0
-    prev=position
-    food_left = sum([f.count(True) for f in foodGrid])
-    max = 0
-    # delta_y = max(position[1],foodGrid.height-position[1]-1)
-    # delta_x = max(position[0], foodGrid.height - position[0] - 1)
-    #
-    # for i in range (-delta_x,delta_x+1):
-    #     x = position[0]+i
-    #     max_column_dist = 0
-    #     max_dist_food = prev
-    #     for j in range(-delta_y, delta_y + 1):
-    #         y = position[1] + j
-    #         if x<foodGrid.width and x > -1 and y> -1 and y<foodGrid.height:
-    #             if foodGrid[x][y]:
-    #                 d = abs(position[0]-x)+abs(position[1]-y)
-    #                 if d > max_column_dist:
-    #                     max_column_dist = d
-    #                     max_dist_food=(x,y)
-    #
-    #     dist_from_prev_food = abs(prev[0] - max_dist_food[0]) + abs(prev[1] - max_dist_food[1])
-    #     total_d+=dist_from_prev_food
-    #     prev = max_dist_food
-    for i in range (0,foodGrid.width):
-        for j in range(0,foodGrid.height):
-            if foodGrid[i][j]:
-                d = abs(position[0]- i) + abs(position[1]-j)
-                if d>max:
-                    max=d
-                dist_from_prev_food = abs(prev[0]-i)+abs(prev[1]-j)
-                total_d+=dist_from_prev_food
-                prev = (i,j)
-    #the max of (manhattan distances to all available food)
-    return max
+    food = foodGrid.asList()
+    if not food:
+        return 0
+    #(food, dist from position)
+    max = ((-1,-1),0)
+    min = ((-1,-1),1000)
+
+    for f in food:
+        d = abs(position[0] - f[0]) + abs(position[1] - f[1])
+        if d > max[1]:
+            max = (f,d)
+        if d < min[1]:
+            min = (f,d)
+
+    #dist between max and min dist nodes
+    dist = abs(max[0][0] - min[0][0])+abs(max[0][1] - min[0][1])
+
+    #heuristic = dist from pos-min + dist_between max-min
+    #better than just max
+    return min[1]+dist
+    '''
+    #stable solution with nodes : 9951  (need to improve) 
+        max = 0
+        for f in food:
+            d = abs(position[0]- f[0]) + abs(position[1]-f[1])
+            if d > max:
+                max=d
+
+        return max
+    '''
+
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
     def registerInitialState(self, state):
