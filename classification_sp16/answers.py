@@ -39,5 +39,7 @@ def q10():
     "*** YOUR CODE HERE ***"
     # filter out any item in the dict that is not the learning rate nor momentum
     allowed_hyperparams = ['learning_rate', 'momentum']
+    hyperparams['learning_rate'] = 0.002
+    hyperparams['momentum'] = 0.95
     hyperparams = dict([(k, v) for (k, v) in hyperparams.items() if k in allowed_hyperparams])
     return hyperparams

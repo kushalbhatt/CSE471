@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -49,13 +49,69 @@ def enhancedFeatureExtractor(datum):
 
     ##
     """
-    features = basicFeatureExtractor(datum)
-
+    #referenced from https://github.com/MattZhao
     "*** YOUR CODE HERE ***"
+    features = np.zeros_like(datum, dtype=int)
+    features[datum > 0] = 1
+
+    width, height = datum.shape[0], datum.shape[1]
+    num_w_regions = 0
+
+    #closed list
+    visited = set()
+    i, j = nextPoint(visited, features, width, height)
+
+    q = util.Queue()
+    '''
+        We will count no of connected white regions.
+        8 = 3 regions
+        6,9 = 2
+        1,2,3,5,7 = just 1
+        4 can have either 1 or 2  based on how we wright it
+    '''
+    while i >= 0 and j >= 0:
+        q.push((i, j))
+        num_w_regions += 1
+
+        while not q.isEmpty():
+            x, y = q.pop()
+            if y > 0 and features[x][y - 1] == 0 and (x, y - 1) not in visited:
+                visited.add((x, y - 1))
+                q.push((x, y - 1))
+
+            if y + 1 < height and features[x][y + 1] == 0 and (x, y + 1) not in visited:
+                visited.add((x, y + 1))
+                q.push((x, y + 1))
+
+            if x + 1 < width and features[x + 1][y] == 0 and (x + 1, y) not in visited:
+                visited.add((x + 1, y))
+                q.push((x + 1, y))
+
+            if x > 0 and features[x - 1][y] == 0 and (x - 1, y) not in visited:
+                visited.add((x - 1, y))
+                q.push((x - 1, y))
+
+        i, j = nextPoint(visited, features, width, height)
+
+    #one-hot-feature no of connected componenets[#1,#2,#3]
+    extra_features = np.array([0, 0, 0])
+    if num_w_regions == 1:
+        extra_features = np.array([1, 0, 0])
+    elif num_w_regions == 2:
+        extra_features = np.array([0, 1, 0])
+    elif num_w_regions > 2:
+        extra_features = np.array([0, 0, 1])
+
+    return np.concatenate((features.flatten(), extra_features), axis = 0)
     util.raiseNotDefined()
 
-    return features
-
+def nextPoint(visited, features, width, height):
+    for i in range(width):
+        for j in range(height):
+            if features[i][j] == 0 and (i, j) not in visited:
+                visited.add((i, j))
+                return i, j
+    return -1, -1
 
 def analysis(model, trainData, trainLabels, trainPredictions, valData, valLabels, validationPredictions):
     """
